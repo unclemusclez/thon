@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VS Code Remote Client</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-brand"><span>&#9670;</span> VS Code Remote</div>
+      <div class="sidebar-nav">
+        <button class="nav-item active" data-page="instances">
+          <span class="nav-icon">&#9633;</span> Instances
+        </button>
+        <button class="nav-item" data-page="lemonade">
+          <span class="nav-icon">&#9889;</span> Lemonade Server
+        </button>
+      </div>
+      <div class="sidebar-footer">
+        <div class="version">v0.1.0</div>
+      </div>
+    </nav>
+
+    <main class="main">
+      <!-- Instances Page -->
+      <section id="page-instances" class="page-section active">
+        <div class="page-header">
+          <h1 class="page-title">Instances</h1>
+          <div class="page-actions">
+            <button class="btn" onclick="refreshInstances()">&#8635; Refresh</button>
+            <button class="btn btn-primary" onclick="openCreateModal()">+ New Instance</button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Running</div>
+            <div class="stat-value text-success" id="stat-running">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Paused</div>
+            <div class="stat-value text-warning" id="stat-paused">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total</div>
+            <div class="stat-value text-info" id="stat-total">-</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="toolbar">
+            <input type="text" class="search-input" placeholder="Search instances..." id="search-input" oninput="filterInstances()">
+            <select class="filter-select" id="state-filter" onchange="filterInstances()">
+              <option value="">All States</option>
+              <option value="Running">Running</option>
+              <option value="Paused">Paused</option>
+              <option value="Pending">Pending</option>
+              <option value="Terminated">Terminated</option>
+              <option value="Failed">Failed</option>
+            </select>
+            <div style="flex:1"></div>
+            <button class="btn btn-warning btn-sm" onclick="bulkAction('pause')" id="bulk-pause-btn" disabled>Pause Selected</button>
+            <button class="btn btn-success btn-sm" onclick="bulkAction('resume')" id="bulk-resume-btn" disabled>Resume Selected</button>
+            <button class="btn btn-danger btn-sm" onclick="bulkAction('kill')" id="bulk-kill-btn" disabled>Kill Selected</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="select-all" onchange="toggleSelectAll()"></th>
+                  <th>User</th>
+                  <th>Instance ID</th>
+                  <th>State</th>
+                  <th>Endpoint</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="instances-body">
+              </tbody>
+            </table>
+          </div>
+          <div id="instances-loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading instances...</p>
+          </div>
+          <div id="instances-empty" class="empty-state" style="display:none;">
+            <p>No instances found</p>
+            <button class="btn btn-primary" onclick="openCreateModal()">Create your first instance</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Lemonade Page -->
+      <section id="page-lemonade" class="page-section">
+        <div class="page-header">
+          <h1 class="page-title">Lemonade Server</h1>
+          <div class="page-actions">
+            <button class="btn" onclick="refreshLemonade()">&#8635; Refresh</button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Status</div>
+            <div class="stat-value" id="lemonade-status">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Model</div>
+            <div class="stat-value text-info" id="lemonade-model" style="font-size:16px;">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Context</div>
+            <div class="stat-value" id="lemonade-ctx">-</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Users</div>
+            <div class="stat-value" id="lemonade-users">-</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">API Information</div>
+          </div>
+          <div class="lemonade-grid" id="lemonade-api-grid">
+            <div class="lemonade-item">
+              <div class="lemonade-label">Endpoint</div>
+              <div class="lemonade-value" id="lemonade-endpoint">-</div>
+            </div>
+            <div class="lemonade-item">
+              <div class="lemonade-label">OpenAI Compatible</div>
+              <div class="lemonade-value" id="lemonade-openai">-</div>
+            </div>
+            <div class="lemonade-item">
+              <div class="lemonade-label">API Key</div>
+              <div class="lemonade-value" id="lemonade-key">-</div>
+            </div>
+            <div class="lemonade-item">
+              <div class="lemonade-label">Admin Key</div>
+              <div class="lemonade-value" id="lemonade-admin-key">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Available Models</div>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Checkpoint</th>
+                  <th>Recipe</th>
+                  <th>Labels</th>
+                </tr>
+              </thead>
+              <tbody id="lemonade-models-body">
+              </tbody>
+            </table>
+          </div>
+          <div id="lemonade-models-empty" class="empty-state" style="display:none;">
+            <p>No models configured</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Create Instance Modal -->
+  <div class="modal-overlay" id="create-modal">
+    <div class="modal">
+      <div class="modal-title">Create Instance</div>
+      <div class="form-group">
+        <label class="form-label">Group</label>
+        <input type="text" class="form-input" id="create-group" value="default" placeholder="default">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-input" id="create-username" value="workspace" placeholder="workspace">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Port</label>
+        <input type="number" class="form-input" id="create-port" value="8443" min="1024" max="65535">
+      </div>
+      <div class="form-group">
+        <label class="form-checkbox">
+          <input type="checkbox" id="create-secure">
+          Enable password authentication
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeCreateModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="createInstance()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

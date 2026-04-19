@@ -374,19 +374,143 @@ extensions making cross-site requests to github.com — cannot be fixed server-s
 
 ## File Map
 
+### Legacy CLI (`main.py`, `scripts/`)
+
 | File | Purpose |
 |------|---------|
 | `main.py` | Entry point; argparse CLI; groups loading; instance orchestration; persistent workspaces; Lemonade kilo.json injection |
-| `groups.yaml` | Groups and users configuration |
-| `setup.sh` | One-time install: python3, nginx, docker.io, mkcert, openssl |
-| `nginx_config.py` | `NginxConfigGenerator`; per-port individual configs in sites-available |
-| `ssl_cert.py` | `SSLCertificateGenerator`; mkcert primary with openssl fallback |
-| `generate-certs.py` | Legacy mkcert helper (preserved for local dev) |
-| `lemonade_server.py` | `LemonadeServerManager`; Python wrapper for install, configure, start/stop, pull/load models, generate kilo.json |
-| `setup-lemonade.sh` | All-in-one shell script: install, configure, generate API keys, pull model, generate kilo.json (recommended) |
-| `build-amd-mi300x-llama-server.sh` | Build llama.cpp from source for AMD MI300X (gfx942) with ROCm; installed to `/usr/local` |
-| `kilo.json` | Kilo Code config template for Lemonade OpenAI-compatible provider |
-| `vscode-settings.jsonc` | VS Code settings template injected into each sandbox's code-server |
+| `scripts/setup.sh` | One-time install: python3, nginx, docker.io, mkcert, openssl |
+| `scripts/nginx_config.py` | `NginxConfigGenerator`; per-port individual configs in sites-available |
+| `scripts/ssl_cert.py` | `SSLCertificateGenerator`; mkcert primary with openssl fallback |
+| `scripts/generate-certs.py` | Legacy mkcert helper (preserved for local dev) |
+| `scripts/lemonade_server.py` | `LemonadeServerManager`; Python wrapper for install, configure, start/stop, pull/load models, generate kilo.json |
+| `scripts/setup-lemonade.sh` | All-in-one shell script: install, configure, generate API keys, pull model, generate kilo.json (recommended) |
+| `scripts/build.sh` | Build helper script |
+| `scripts/build-amd-mi300x-llama-server.sh` | Build llama.cpp from source for AMD MI300X (gfx942) with ROCm |
+| `scripts/prerequisite-script.sh` | Prerequisite installation |
+| `config/groups.yaml.example` | Groups and users configuration template |
+| `config/kilo.json.example` | Kilo Code config template for Lemonade OpenAI-compatible provider |
+| `config/vscode-settings.jsonc.example` | VS Code settings template injected into each sandbox's code-server |
+| `config/extensions.txt.example` | VS Code extensions list for Docker image |
+| `reference/kilo.config.schema.json` | Kilo config JSON schema |
+| `reference/template.portnumber.available.md` | Nginx template reference |
 | `Dockerfile` | Sandbox image: python:3.12-slim + code-server + non-root vscode user |
-| `template.portnumber.available.md` | Nginx template reference showing port-based location blocks |
-| `../vscode/main.py` | Reference template: single-instance, minimal |
+
+### Dashboard Application (`app/`)
+
+| File | Purpose |
+|------|---------|
+| `app/__init__.py` | Package init |
+| `app/main.py` | FastAPI application entry point; lifespan; static file serving; route mounting |
+| `app/config.py` | `AppConfig` and sub-configs; loaded from env vars (`SANDBOX_*`, `LEMONADE_*`, `DASHBOARD_*`, `AUTH_*`) |
+| `app/models.py` | Pydantic domain models: `InstanceInfo`, `InstanceState`, `UserInfo`, `LemonadeStatus`, `GroupConfig` |
+| `app/exceptions.py` | Custom exceptions: `VSCRemoteError`, `SandboxCreateError`, `LemonadeConnectionError`, `AuthError`, etc. |
+| `app/services/sandbox_service.py` | `SandboxService` — wraps OpenSandbox SDK `SandboxManager` for fleet CRUD (list, create, pause, resume, kill, renew) |
+| `app/services/lemonade_service.py` | `LemonadeService` — Lemonade server status monitoring, model listing, API info |
+| `app/api/routes/instances.py` | REST API: `GET/POST /api/instances`, `POST pause/resume`, `DELETE`, `POST bulk/*` |
+| `app/api/routes/lemonade.py` | REST API: `GET /api/lemonade/status`, `/models`, `/api-info` |
+| `app/api/routes/auth.py` | REST API: `GET /api/auth/providers`, `/login/{provider}`, `/callback/{provider}`, `/logout`, `/me` |
+| `app/auth/providers.py` | OIDC/OAuth2 provider implementations: `GitHubProvider`, `GitLabProvider`, `LinkedInProvider`; PKCE support |
+| `app/auth/sessions.py` | `SessionStore` — in-memory session management with HMAC-signed tokens |
+| `app/auth/deps.py` | FastAPI dependencies: `get_current_user`, `optional_user` |
+
+### Dashboard Frontend (`dashboard/`)
+
+| File | Purpose |
+|------|---------|
+| `dashboard/index.html` | Single-page HTML shell with sidebar nav, modals, table layout |
+| `dashboard/static/style.css` | Dark theme CSS (CSS variables, cards, badges, modals, toasts) |
+| `dashboard/static/app.js` | Frontend JS: instance CRUD, bulk actions, lemonade status, filtering, toasts |
+
+## Dashboard Architecture
+
+### Backend (FastAPI)
+
+```
+app/main.py          → FastAPI app, lifespan, static mounts
+app/api/routes/      → REST API route handlers
+app/services/        → Business logic layer (wraps OpenSandbox SDK + Lemonade)
+app/auth/            → OIDC providers, session store, FastAPI deps
+app/config.py        → Environment-driven configuration
+app/models.py        → Pydantic domain models
+```
+
+**Key design decisions:**
+- `SandboxService` wraps `opensandbox.SandboxManager` for fleet ops and `opensandbox.Sandbox` for single-instance ops
+- `LemonadeService` is read-only (HTTP API calls, no systemd privilege needed)
+- Auth is optional — when `AUTH_ENABLED` is false, all endpoints are open
+- Session tokens are HMAC-signed; replace with Redis/DB for production
+
+### REST API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/instances` | List instances (filter by state, paginate) |
+| `POST` | `/api/instances` | Create new instance |
+| `GET` | `/api/instances/{id}` | Get instance details |
+| `POST` | `/api/instances/{id}/pause` | Pause instance |
+| `POST` | `/api/instances/{id}/resume` | Resume instance |
+| `DELETE` | `/api/instances/{id}` | Terminate instance |
+| `POST` | `/api/instances/{id}/renew` | Extend TTL |
+| `POST` | `/api/instances/bulk/pause` | Bulk pause |
+| `POST` | `/api/instances/bulk/resume` | Bulk resume |
+| `POST` | `/api/instances/bulk/kill` | Bulk terminate |
+| `GET` | `/api/lemonade/status` | Lemonade server status |
+| `GET` | `/api/lemonade/models` | Available models |
+| `GET` | `/api/lemonade/api-info` | API endpoint info |
+| `GET` | `/api/auth/providers` | List auth providers |
+| `GET` | `/api/auth/login/{provider}` | Start OAuth flow |
+| `GET` | `/api/auth/callback/{provider}` | OAuth callback |
+| `POST` | `/api/auth/logout` | End session |
+| `GET` | `/api/auth/me` | Current user info |
+
+### Environment Variables (Dashboard)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SANDBOX_DOMAIN` | `localhost:8080` | OpenSandbox server address |
+| `SANDBOX_API_KEY` | (none) | OpenSandbox API key |
+| `SANDBOX_IMAGE` | `opensandbox/vscode-remote:latest` | Docker image for sandboxes |
+| `LEMONADE_HOST` | `0.0.0.0` | Lemonade server bind address |
+| `LEMONADE_PORT` | `13305` | Lemonade server port |
+| `LEMONADE_API_KEY` | (none) | Lemonade API key |
+| `LEMONADE_ADMIN_API_KEY` | (none) | Lemonade admin API key |
+| `DASHBOARD_HOST` | `0.0.0.0` | Dashboard bind address |
+| `DASHBOARD_PORT` | `8100` | Dashboard port |
+| `DASHBOARD_SECRET_KEY` | (none) | FastAPI secret key |
+| `DASHBOARD_DEBUG` | `false` | Enable debug/reload mode |
+| `AUTH_ENABLED` | `false` | Enable OIDC authentication |
+| `AUTH_SESSION_SECRET` | (none) | HMAC secret for session tokens |
+| `AUTH_GITHUB_CLIENT_ID` | (none) | GitHub OAuth app client ID |
+| `AUTH_GITHUB_CLIENT_SECRET` | (none) | GitHub OAuth app client secret |
+| `AUTH_GITLAB_CLIENT_ID` | (none) | GitLab OAuth app client ID |
+| `AUTH_GITLAB_CLIENT_SECRET` | (none) | GitLab OAuth app client secret |
+| `AUTH_LINKEDIN_CLIENT_ID` | (none) | LinkedIn OIDC client ID |
+| `AUTH_LINKEDIN_CLIENT_SECRET` | (none) | LinkedIn OIDC client secret |
+
+### Running the Dashboard
+
+```bash
+# Install dashboard dependencies
+pip install fastapi uvicorn pydantic
+
+# Run the dashboard (auth disabled)
+python -m app.main
+
+# Run with auth enabled
+AUTH_ENABLED=true AUTH_SESSION_SECRET=my-secret \
+AUTH_GITHUB_CLIENT_ID=xxx AUTH_GITHUB_CLIENT_SECRET=xxx \
+python -m app.main
+
+# Dashboard available at http://localhost:8100
+# API docs at http://localhost:8100/docs
+```
+
+### Future Roadmap
+
+- **Luma invites** — invite codes for onboarding new users
+- **WebSocket real-time updates** — live instance state changes pushed to dashboard
+- **Instance templates** — pre-configured sandbox setups (image, extensions, env)
+- **Usage analytics** — per-user resource usage, token consumption
+- **Multi-server support** — manage sandboxes across multiple OpenSandbox servers
+- **Kubernetes native** — deploy dashboard as a Kubernetes resource alongside OpenSandbox

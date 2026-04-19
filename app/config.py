@@ -1,0 +1,94 @@
+# Copyright 2025 Alibaba Group Holding Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Application configuration loaded from environment variables and config files."""
+
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Optional
+
+
+@dataclass
+class SandboxConfig:
+    """OpenSandbox server connection settings."""
+
+    domain: str = field(default_factory=lambda: os.getenv("SANDBOX_DOMAIN", "localhost:8080"))
+    api_key: Optional[str] = field(default_factory=lambda: os.getenv("SANDBOX_API_KEY"))
+    image: str = field(default_factory=lambda: os.getenv("SANDBOX_IMAGE", "opensandbox/vscode-remote:latest"))
+    request_timeout_seconds: int = 60
+
+
+@dataclass
+class LemonadeConfig:
+    """Lemonade inference server settings."""
+
+    host: str = field(default_factory=lambda: os.getenv("LEMONADE_HOST", "0.0.0.0"))
+    port: int = field(default_factory=lambda: int(os.getenv("LEMONADE_PORT", "13305")))
+    api_key: Optional[str] = field(default_factory=lambda: os.getenv("LEMONADE_API_KEY"))
+    admin_api_key: Optional[str] = field(default_factory=lambda: os.getenv("LEMONADE_ADMIN_API_KEY"))
+    config_dir: Path = field(default_factory=lambda: Path(os.getenv("LEMONADE_CONFIG_DIR", "/var/lib/lemonade/.cache/lemonade")))
+
+
+@dataclass
+class DashboardConfig:
+    """Web dashboard settings."""
+
+    host: str = field(default_factory=lambda: os.getenv("DASHBOARD_HOST", "0.0.0.0"))
+    port: int = field(default_factory=lambda: int(os.getenv("DASHBOARD_PORT", "8100")))
+    secret_key: str = field(default_factory=lambda: os.getenv("DASHBOARD_SECRET_KEY", ""))
+    debug: bool = field(default_factory=lambda: os.getenv("DASHBOARD_DEBUG", "").lower() in ("1", "true", "yes"))
+
+
+@dataclass
+class AuthConfig:
+    """Authentication / OIDC provider settings."""
+
+    enabled: bool = field(default_factory=lambda: os.getenv("AUTH_ENABLED", "").lower() in ("1", "true", "yes"))
+    session_secret: str = field(default_factory=lambda: os.getenv("AUTH_SESSION_SECRET", ""))
+    github_client_id: Optional[str] = field(default_factory=lambda: os.getenv("AUTH_GITHUB_CLIENT_ID"))
+    github_client_secret: Optional[str] = field(default_factory=lambda: os.getenv("AUTH_GITHUB_CLIENT_SECRET"))
+    gitlab_client_id: Optional[str] = field(default_factory=lambda: os.getenv("AUTH_GITLAB_CLIENT_ID"))
+    gitlab_client_secret: Optional[str] = field(default_factory=lambda: os.getenv("AUTH_GITLAB_CLIENT_SECRET"))
+    linkedin_client_id: Optional[str] = field(default_factory=lambda: os.getenv("AUTH_LINKEDIN_CLIENT_ID"))
+    linkedin_client_secret: Optional[str] = field(default_factory=lambda: os.getenv("AUTH_LINKEDIN_CLIENT_SECRET"))
+
+
+@dataclass
+class NginxConfig:
+    """Nginx reverse proxy settings."""
+
+    ssl_dir: str = "/etc/nginx/ssl"
+    external_ip: Optional[str] = None
+
+
+@dataclass
+class AppConfig:
+    """Root application configuration aggregating all sub-configs."""
+
+    sandbox: SandboxConfig = field(default_factory=SandboxConfig)
+    lemonade: LemonadeConfig = field(default_factory=LemonadeConfig)
+    dashboard: DashboardConfig = field(default_factory=DashboardConfig)
+    auth: AuthConfig = field(default_factory=AuthConfig)
+    nginx: NginxConfig = field(default_factory=NginxConfig)
+    groups_file: Optional[Path] = None
+    workspace_dir: Optional[str] = None
+
+    @classmethod
+    def from_env(cls, groups_file: Optional[str] = None) -> "AppConfig":
+        cfg = cls()
+        if groups_file:
+            p = Path(groups_file)
+            cfg.groups_file = p if p.exists() else None
+        return cfg
