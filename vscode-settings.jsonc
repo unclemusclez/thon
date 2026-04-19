@@ -1,0 +1,191 @@
+{
+    "remote.SSH.showLoginTerminal": true,
+    "workbench.editorAssociations": {
+        "*.ipynb": "jupyter-notebook"
+    },
+    "terminal.integrated.tabs.enabled": true,
+    "yaml.customTags": [
+        "!encrypted/pkcs1-oaep scalar",
+        "!vault scalar"
+    ],
+    "remote.SSH.lockfilesInTmp": true,
+    "remote.SSH.localServerDownload": "always",
+    "remote.downloadExtensionsLocally": true,
+    "remote.SSH.enableDynamicForwarding": false,
+    "notebook.cellToolbarLocation": {
+        "default": "right",
+        "jupyter-notebook": "left"
+    },
+    "security.workspace.trust.untrustedFiles": "open",
+    "editor.accessibilitySupport": "off",
+    "workbench.settings.applyToAllProfiles": [
+        "prettier.configPath"
+    ],
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "editor.formatOnType": true,
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "vscode-edge-devtools.webhintInstallNotification": true,
+    "notebook.defaultFormatter": "ms-python.black-formatter",
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "workbench.startupEditor": "none",
+    "editor.multiCursorLimit": 100000,
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    "git.autofetch": true,
+    "python.terminal.launchArgs": [
+        "-m",
+        "IPython",
+        "--no-autoindent"
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "meta.pyrefly"
+    },
+    "redhat.telemetry.enabled": false,
+    "[dockerfile]": {
+        "editor.defaultFormatter": "ms-azuretools.vscode-containers"
+    },
+    "files.exclude": {
+        "**/.trunk/*actions/": true,
+        "**/.trunk/*logs/": true,
+        "**/.trunk/*notifications/": true,
+        "**/.trunk/*out/": true,
+        "**/.trunk/*plugins/": true
+    },
+    "files.watcherExclude": {
+        "**/.trunk/*actions/": true,
+        "**/.trunk/*logs/": true,
+        "**/.trunk/*notifications/": true,
+        "**/.trunk/*out/": true,
+        "**/.trunk/*plugins/": true
+    },
+    "[shellscript]": {
+        "editor.defaultFormatter": "mads-hartmann.bash-ide-vscode"
+    },
+    "files.associations": {
+        "*.sh": "shellscript"
+    },
+    "[handlebars]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[go]": {
+        "editor.defaultFormatter": "golang.go"
+    },
+    "editor.unicodeHighlight.invisibleCharacters": false,
+    "editor.unicodeHighlight.ambiguousCharacters": false,
+    "diffEditor.hideUnchangedRegions.enabled": true,
+    "makefile.configureOnOpen": true,
+    "go.toolsManagement.autoUpdate": true,
+    "git.openRepositoryInParentFolders": "never",
+    "hexeditor.columnWidth": 16,
+    "hexeditor.showDecodedText": true,
+    "hexeditor.defaultEndianness": "little",
+    "hexeditor.inspectorType": "aside",
+    "svelte.enable-ts-plugin": true,
+    "git.confirmSync": false,
+    "docker.extension.dockerEngineAvailabilityPrompt": false,
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "workbench.activityBar.location": "top",
+    "gitlab.duoChat.enabled": false,
+    "gitlab.duoCodeSuggestions.enabled": false,
+    "git.replaceTagsWhenPull": true,
+    "githubPullRequests.createOnPublishBranch": "never",
+    "terminal.integrated.inheritEnv": false,
+    "ansible.lightspeed.enabled": false,
+    "ansible.lightspeed.suggestions.enabled": false,
+    "git.blame.editorDecoration.enabled": true,
+    "prettier.enableDebugLogs": true,
+    "prettier.endOfLine": "auto",
+    "prettier.experimentalTernaries": true,
+    "docker.extension.enableComposeLanguageServer": false,
+    "python.analysis.typeCheckingMode": "standard",
+    "gitlab.duoCodeSuggestions.openTabsContext": false,
+    "gitlab.keybindingHints.enabled": false,
+    "gitlab.real-timeSecurityScan.enabled": true,
+    "gitlab.showPipelineUpdateNotifications": true,
+    "workbench.panel.showLabels": false,
+    "C_Cpp.copilotHover": "disabled",
+    "dataWrangler.experiments.copilot.enabled": false,
+    "diffEditor.maxComputationTime": 0,
+    "prettier.configPath": "~/prettier",
+    "python.testing.unittestEnabled": true,
+    "python.useEnvironmentsExtension": true,
+    "editor.formatOnSaveMode": "modificationsIfAvailable",
+    "notebook.formatOnSave.enabled": true,
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.diagnosticsSource": "Pylance",
+    "python.analysis.displayEnglishDiagnostics": true,
+    "python.analysis.supportDocstringTemplate": true,
+    "python.analysis.supportAllPythonDocuments": true,
+    "python.analysis.inlayHints.callArgumentNames": "all",
+    "python.analysis.autoImportCompletions": true,
+    "[dockercompose]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.autoIndent": "advanced",
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": true
+        },
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "[github-actions-workflow]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "python.analysis.enableTroubleshootMissingImports": true,
+    "python.languageServer": "None",
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.testing.pytestEnabled": true,
+    "appService.enablePythonRemoteDebugging": true,
+    "jupyter.enableExtendedPythonKernelCompletions": true,
+    "python.analysis.completeFunctionParens": true,
+    "python.analysis.languageServerMode": "full",
+    "python.analysis.typeEvaluation.enableExperimentalFeatures": true,
+    "debugpy.showPythonInlineValues": true,
+    "python-envs.terminal.showActivateButton": true,
+    "isort.check": true,
+    "python.analysis.generateWithTypeAnnotation": true,
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.pytestParameters": true,
+    "python.analysis.inlayHints.variableTypes": true,
+    "python.venvPath": "${workspaceFolder}/.venv",
+    "terminal.integrated.shellIntegration.environmentReporting": true,
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "mssql.autoDisableNonTSqlLanguageService": true,
+    "terminal.integrated.initialHint": false,
+    "chat.viewSessions.orientation": "stacked",
+    "gitlab.duoAgentPlatform.enabled": false,
+    "gitlab.duo.enabledWithoutGitlabProject": false,
+    "terminal.integrated.altClickMovesCursor": false,
+    "chat.agent.enabled": false,
+    "chat.checkpoints.enabled": false,
+    "chat.customAgentInSubagent.enabled": false,
+    "chat.agent.thinking.terminalTools": false,
+    "chat.math.enabled": false,
+    "chat.tips.enabled": false,
+    "chat.agentsControl.enabled": "hidden",
+    "inlineChat.askInChat": false,
+    "chat.disableAIFeatures": true,
+    "python-envs.alwaysUseUv": false,
+    "powershell.startAsLoginShell.osx": false,
+    "python-envs.terminal.autoActivationType": "shellStartup",
+    "python.createEnvironment.contentButton": "show",
+    "python.terminal.focusAfterLaunch": true,
+    "python.terminal.useEnvFile": true,
+    "terminal-in-status-bar.statusBarLabel": true,
+    "terminal.integrated.commandsToSkipShell": [
+        "kilo-code.new.agentManagerOpen",
+        "kilo-code.new.agentManager.showTerminal"
+    ],
+    "kilo-code.new.browserAutomation.useSystemChrome": false,
+    "telemetry.telemetryLevel": "off",
+    "kilo-code.new.showTaskTimeline": true,
+    "kilo-code.new.browserAutomation.enabled": true,
+    "window.newWindowProfile": "Default"
+}

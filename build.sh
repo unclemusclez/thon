@@ -1,0 +1,42 @@
+#!/bin/bash
+# Copyright 2025 Alibaba Group Holding Ltd.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -ex
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+
+TAG=${TAG:-latest}
+PUSH=${PUSH:-false}
+
+if [ "$PUSH" = "true" ]; then
+  docker buildx rm vscode-remote-builder || true
+  docker buildx create --use --name vscode-remote-builder
+  docker buildx inspect --bootstrap
+  docker buildx ls
+  docker buildx build \
+    -t opensandbox/vscode-remote:${TAG} \
+    -t sandbox-registry.cn-zhangjiakou.cr.aliyuncs.com/opensandbox/vscode-remote:${TAG} \
+    --platform linux/amd64,linux/arm64 \
+    -f examples/vscode-remote/Dockerfile \
+    --push \
+    "${REPO_DIR}"
+else
+  docker buildx build \
+    -t opensandbox/vscode-remote:${TAG} \
+    -f examples/vscode-remote/Dockerfile \
+    --load \
+    "${REPO_DIR}"
+fi

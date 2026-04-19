@@ -1,0 +1,370 @@
+---
+title: CLI Reference
+description: Complete command-line reference for VS Code Remote and Lemonade Server
+---
+
+# CLI Reference
+
+## main.py - VS Code Instance Orchestrator
+
+### Synopsis
+
+```bash
+python examples/vscode-remote/main.py [OPTIONS]
+```
+
+### Options
+
+#### Core Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--groups FILE` | string | (none) | Path to groups.yaml file |
+| `--group GROUP` | string | (all) | Run only this group from groups.yaml |
+| `--port PORT` | int | 8443 | Starting port for code-server instances |
+| `--timeout MIN` | int | 0 | Timeout in minutes (0 = no timeout) |
+
+#### Server Connection
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--domain DOMAIN` | string | localhost:8080 | Sandbox server domain |
+| `--api-key KEY` | string | (none) | Sandbox API key |
+
+#### Docker Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--image IMAGE` | string | opensandbox/vscode-remote:latest | Docker image for sandbox |
+| `--python-version VER` | string | 3.11 | Python version in sandbox |
+
+#### Security
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--secure` | flag | false | Enable per-user password authentication |
+
+#### Network
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--external-ip IP` | string | (auto-detect) | External IP for SSL cert and URLs |
+| `--ssl-dir DIR` | string | /etc/nginx/ssl | SSL certificate storage directory |
+| `--no-nginx` | flag | false | Disable nginx, use direct HTTP access |
+
+#### Workspace
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--workspace-dir DIR` | string | (none) | Host dir for persistent bind mounts |
+
+#### Lemonade Integration
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--lemonade KILO_JSON` | string | (none) | Path to kilo.json for LLM config injection |
+| `--vscode-settings JSON` | string | (none) | VS Code settings file to inject |
+
+#### Maintenance
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--cleanup` | flag | false | Remove all nginx configs and exit |
+
+### Examples
+
+#### Basic Usage
+
+```bash
+# Single instance (no groups)
+python main.py
+
+# All groups with nginx SSL
+python main.py --groups groups.yaml --external-ip 1.2.3.4
+
+# Single group
+python main.py --groups groups.yaml --group alpha --external-ip 1.2.3.4
+```
+
+#### With Security
+
+```bash
+# Per-user passwords
+python main.py --groups groups.yaml --secure --external-ip 1.2.3.4
+```
+
+#### With Persistence
+
+```bash
+# Persistent workspace bind mounts
+python main.py --groups groups.yaml --workspace-dir /vs-code-remote --external-ip 1.2.3.4
+```
+
+#### With Lemonade
+
+```bash
+# Local LLM inference
+python main.py --groups groups.yaml --external-ip 1.2.3.4 --lemonade kilo.json
+```
+
+#### Custom Settings
+
+```bash
+# Custom VS Code settings
+python main.py --groups groups.yaml --external-ip 1.2.3.4 \
+    --vscode-settings vscode-settings.jsonc
+```
+
+#### No Nginx
+
+```bash
+# Direct HTTP access
+python main.py --groups groups.yaml --no-nginx
+```
+
+#### Cleanup
+
+```bash
+# Remove nginx configs
+python main.py --cleanup
+```
+
+---
+
+## setup-lemonade.sh - Lemonade Server Setup
+
+### Synopsis
+
+```bash
+bash examples/vscode-remote/setup-lemonade.sh [OPTIONS]
+```
+
+### Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--groups FILE` | (none) | groups.yaml for user count |
+| `--group GROUP` | (all) | Filter to single group |
+| `--num-users N` | 1 | Override parallel user count |
+| `--port PORT` | 13305 | Server port |
+| `--host HOST` | 0.0.0.0 | Bind address |
+| `--backend BACKEND` | auto | llama.cpp backend: auto, vulkan, cpu |
+| `--ctx-size SIZE` | 262144 | Per-user context size |
+| `--model MODEL` | unsloth/gemma-4-31B-it-GGUF:Q8_K_XL | HuggingFace checkpoint |
+| `--model-name NAME` | gemma-4-31b-it | Short model name |
+| `--mmproj FILE` | mmproj-BF16.gguf | Vision mmproj filename |
+| `--external-ip IP` | (auto) | External IP for kilo.json |
+| `--generate-keys` | false | Generate API keys |
+| `--no-prefer-system` | (system) | Use bundled llama.cpp |
+| `--llamacpp-bin PATH` | /usr/local/bin/llama-server | System binary path |
+| `--kilo-config PATH` | ./kilo.json | Output path for kilo.json |
+| `-h, --help` | | Show help message |
+
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `LEMONADE_PORT` | Server port |
+| `LEMONADE_HOST` | Bind address |
+| `LEMONADE_BACKEND` | llama.cpp backend |
+| `LEMONADE_CTX_SIZE` | Per-user context size |
+| `LEMONADE_MODEL` | HuggingFace checkpoint |
+| `LEMONADE_MODEL_NAME` | Short model name |
+| `LEMONADE_EXTERNAL_IP` | External IP |
+| `LEMONADE_GENERATE_KEYS` | Generate API keys (true/false) |
+| `LEMONADE_NUM_USERS` | Parallel user count |
+| `LEMONADE_KILO_CONFIG` | kilo.json output path |
+| `LEMONADE_PREFER_SYSTEM` | Prefer system binary (true/false) |
+| `LEMONADE_LLMACPP_BIN` | System binary path |
+| `LEMONADE_MMPROJ` | mmproj filename |
+
+### Examples
+
+#### Basic Setup
+
+```bash
+bash setup-lemonade.sh --generate-keys --external-ip 1.2.3.4
+```
+
+#### With Groups
+
+```bash
+bash setup-lemonade.sh --groups groups.yaml --generate-keys --external-ip 1.2.3.4
+```
+
+#### Custom Model
+
+```bash
+bash setup-lemonade.sh \
+    --model Qwen/Qwen2.5-Coder-7B-Instruct-GGUF:Q4_K_M \
+    --model-name qwen-coder-7b \
+    --generate-keys \
+    --external-ip 1.2.3.4
+```
+
+#### Custom Binary
+
+```bash
+bash setup-lemonade.sh \
+    --llamacpp-bin /opt/llama.cpp/llama-server \
+    --generate-keys \
+    --external-ip 1.2.3.4
+```
+
+---
+
+## lemonade_server.py - Python CLI Wrapper
+
+### Synopsis
+
+```bash
+python examples/vscode-remote/lemonade_server.py COMMAND [OPTIONS]
+```
+
+### Commands
+
+| Command | Description |
+|---------|-------------|
+| `install` | Install lemonade-server via PPA |
+| `configure` | Configure server settings |
+| `start` | Start the server |
+| `stop` | Stop the server |
+| `restart` | Restart the server |
+| `status` | Check server status |
+| `pull` | Pull a model to local cache |
+| `run` | Full setup + keep alive |
+| `count-users` | Count users from groups.yaml |
+| `write-model-configs` | Write user_models.json and recipe_options.json |
+| `generate-kilo-config` | Generate kilo.json for Kilo Code |
+| `cleanup` | Stop server and clean up |
+
+### install
+
+```bash
+python lemonade_server.py install
+```
+
+Installs lemonade-server from PPA.
+
+### configure
+
+```bash
+python lemonade_server.py configure [OPTIONS]
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--port PORT` | 13305 | Server port |
+| `--host HOST` | 0.0.0.0 | Bind address |
+| `--llamacpp-backend BACKEND` | auto | Backend: auto, vulkan, cpu |
+| `--ctx-size SIZE` | 4096 | Default context size |
+| `--max-loaded-models N` | 1 | Max models per type slot |
+| `--generate-keys` | false | Generate API keys |
+| `--prefer-system` | true | Prefer system llama.cpp |
+| `--no-prefer-system` | | Use bundled llama.cpp |
+| `--llamacpp-bin PATH` | /usr/local/bin/llama-server | System binary path |
+| `--kilo-config PATH` | (none) | Generate kilo.json |
+| `--model MODEL` | (default) | Model for kilo.json |
+| `--external-ip IP` | (auto) | External IP for kilo.json |
+
+### pull
+
+```bash
+python lemonade_server.py pull --model MODEL
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--model MODEL` | (required) | HuggingFace checkpoint |
+
+### run
+
+```bash
+python lemonade_server.py run [OPTIONS]
+```
+
+Full setup: install + configure + start + pull model + keep alive.
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--model MODEL` | unsloth/gemma-4-31B-it-GGUF:Q8_K_XL | HuggingFace checkpoint |
+| `--model-name NAME` | gemma-4-31b-it | Short model name |
+| `--groups FILE` | (none) | groups.yaml for user count |
+| `--group GROUP` | (all) | Filter to single group |
+| `--num-users N` | 1 | Override parallel user count |
+| `--port PORT` | 13305 | Server port |
+| `--host HOST` | 0.0.0.0 | Bind address |
+| `--llamacpp-backend BACKEND` | auto | Backend: auto, vulkan, cpu |
+| `--ctx-size SIZE` | 4096 | Default context size |
+| `--generate-keys` | false | Generate API keys |
+| `--external-ip IP` | (auto) | External IP |
+| `--kilo-config PATH` | (auto) | kilo.json output path |
+| `--prefer-system` | true | Prefer system binary |
+| `--llamacpp-bin PATH` | /usr/local/bin/llama-server | System binary path |
+| `--mmproj FILE` | mmproj-BF16.gguf | Vision mmproj filename |
+| `--skip-install` | false | Skip installation check |
+
+### write-model-configs
+
+```bash
+python lemonade_server.py write-model-configs [OPTIONS]
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--model MODEL` | (default) | HuggingFace checkpoint |
+| `--model-name NAME` | gemma-4-31b-it | Short model name |
+| `--num-users N` | 1 | Parallel user count |
+| `--llamacpp-backend BACKEND` | auto | Backend |
+| `--mmproj FILE` | mmproj-BF16.gguf | Vision mmproj filename |
+
+### generate-kilo-config
+
+```bash
+python lemonade_server.py generate-kilo-config [OPTIONS]
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `--model MODEL` | (default) | HuggingFace checkpoint |
+| `--model-name NAME` | gemma-4-31b-it | Short model name |
+| `--external-ip IP` | (auto) | External IP |
+| `--output PATH` | kilo.json | Output path |
+| `--api-key KEY` | (none) | API key |
+| `--admin-api-key KEY` | (none) | Admin API key |
+
+### Examples
+
+```bash
+# Full setup
+python lemonade_server.py run --groups groups.yaml --generate-keys --external-ip 1.2.3.4
+
+# Just configure
+python lemonade_server.py configure --generate-keys --external-ip 1.2.3.4
+
+# Write model configs only
+python lemonade_server.py write-model-configs --num-users 6
+
+# Generate kilo.json
+python lemonade_server.py generate-kilo-config --admin-api-key YOUR_KEY --external-ip 1.2.3.4
+```
+
+---
+
+## Environment Variables
+
+### Sandbox Server
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `SANDBOX_DOMAIN` | localhost:8080 | Sandbox server address |
+| `SANDBOX_API_KEY` | (none) | Sandbox API key |
+| `SANDBOX_IMAGE` | opensandbox/vscode-remote:latest | Docker image |
+| `PYTHON_VERSION` | 3.11 | Python in sandbox |
+
+### Lemonade Server
+
+| Variable | Description |
+|----------|-------------|
+| `LEMONADE_API_KEY` | API key for regular endpoints |
+| `LEMONADE_ADMIN_API_KEY` | API key for admin endpoints |

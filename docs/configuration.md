@@ -1,0 +1,332 @@
+---
+title: Configuration Reference
+description: Detailed configuration options for VS Code Remote and Lemonade Server
+---
+
+# Configuration Reference
+
+## groups.yaml
+
+Defines users and groups for VS Code instance creation.
+
+### Structure
+
+```yaml
+groups:
+  <group-name>:
+    users:
+      - <username>
+      - <username>
+```
+
+### Example
+
+```yaml
+groups:
+  alpha:
+    users:
+      - alice
+      - bob
+      - carol
+  beta:
+    users:
+      - dave
+      - eve
+  gamma:
+    users:
+      - frank
+```
+
+### Behavior
+
+- Each user gets a unique sandbox instance
+- Workspace path: `/workspace/{group}/{username}`
+- URL path: `https://{ip}/{endpoint_port}/proxy/{code_server_port}/`
+- Port assignment: Sequential from `--port` (default 8443)
+
+---
+
+## nginx Configuration
+
+### Directory Structure
+
+```
+/etc/nginx/
+├── sites-available/
+│   ├── sandbox-vscode-remote-8443
+│   ├── sandbox-vscode-remote-8444
+│   └── ...
+├── sites-enabled/
+│   ├── sandbox-vscode-remote-8443 -> ../sites-available/sandbox-vscode-remote-8443
+│   └── ...
+└── ssl/
+    ├── server-<ip-hash>.crt
+    ├── server-<ip-hash>.key
+    └── ca.crt (if mkcert)
+```
+
+### Per-Port Server Block
+
+Each VS Code instance gets its own nginx config:
+
+```nginx
+server {
+    listen 80;
+    listen 443 ssl;
+    server_name _;
+
+    ssl_certificate /etc/nginx/ssl/server.crt;
+    ssl_certificate_key /etc/nginx/ssl/server.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    location / {
+        proxy_pass http://127.0.0.1:52322/;
+
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_redirect off;
+
+        add_header Service-Worker-Allowed /;
+
+        proxy_read_timeout 86400;
+        proxy_send_timeout 86400;
+        proxy_buffering off;
+        proxy_request_buffering off;
+    }
+
+    location = /ca.crt {
+        alias /path/to/mkcert/rootCA.pem;
+    }
+}
+```
+
+### Key Configuration Points
+
+| Setting | Value | Reason |
+|---------|-------|--------|
+| `proxy_pass` | `http://127.0.0.1:{port}/` | No upstream path (prevents doubling) |
+| `Service-Worker-Allowed` | `/` | Fixes SW scope errors |
+| `proxy_read_timeout` | `86400` | 24h for long-lived WebSocket |
+| `proxy_buffering` | `off` | Real-time terminal output |
+
+---
+
+## Lemonade Server Configuration
+
+### config.json
+
+Location: `/var/lib/lemonade/.cache/lemonade/config.json`
+
+```json
+{
+  "config_version": 1,
+  "port": 13305,
+  "host": "0.0.0.0",
+  "log_level": "info",
+  "global_timeout": 300,
+  "max_loaded_models": 1,
+  "no_broadcast": false,
+  "extra_models_dir": "",
+  "models_dir": "auto",
+  "ctx_size": 1572864,
+  "offline": false,
+  "disable_model_filtering": false,
+  "enable_dgpu_gtt": false,
+  "llamacpp": {
+    "backend": "auto",
+    "args": "",
+    "prefer_system": true,
+    "rocm_bin": "/usr/local/bin/llama-server",
+    "vulkan_bin": "/usr/local/bin/llama-server",
+    "cpu_bin": "/usr/local/bin/llama-server"
+  },
+  "whispercpp": {
+    "backend": "auto",
+    "args": "",
+    "cpu_bin": "builtin",
+    "npu_bin": "builtin"
+  },
+  "sdcpp": {
+    "backend": "auto",
+    "args": "",
+    "steps": 20,
+    "cfg_scale": 7.0,
+    "width": 512,
+    "height": 512,
+    "cpu_bin": "builtin",
+    "rocm_bin": "builtin",
+    "vulkan_bin": "builtin"
+  },
+  "flm": { "args": "" },
+  "ryzenai": { "server_bin": "builtin" },
+  "kokoro": { "cpu_bin": "builtin" }
+}
+```
+
+### Config Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `port` | int | 13305 | HTTP server port |
+| `host` | string | localhost | Bind address |
+| `log_level` | string | info | trace, debug, info, warning, error |
+| `global_timeout` | int | 300 | Timeout in seconds |
+| `max_loaded_models` | int | 1 | Max models per type (-1 for unlimited) |
+| `ctx_size` | int | 4096 | Default context size |
+| `offline` | bool | false | Skip model downloads |
+| `llamacpp.backend` | string | auto | auto, vulkan, cpu |
+| `llamacpp.prefer_system` | bool | false | Prefer system llama.cpp |
+| `llamacpp.*_bin` | string | builtin | Path to binary or "builtin" |
+
+### user_models.json
+
+Location: `/var/lib/lemonade/.cache/lemonade/user_models.json`
+
+```json
+{
+  "gemma-4-31b-it": {
+    "model_name": "gemma-4-31b-it",
+    "checkpoint": "unsloth/gemma-4-31B-it-GGUF:Q8_K_XL",
+    "recipe": "llamacpp",
+    "suggested": true,
+    "labels": ["custom", "vision"],
+    "mmproj": "mmproj-BF16.gguf"
+  }
+}
+```
+
+### Model Entry Fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `model_name` | No | Display name (matches key) |
+| `checkpoint` | Yes | HuggingFace checkpoint (org/repo:variant) |
+| `recipe` | Yes | Backend engine (llamacpp, whispercpp, etc.) |
+| `suggested` | No | Show as suggested model |
+| `labels` | No | Tags (custom, vision, embeddings) |
+| `mmproj` | No | Vision model mmproj filename |
+| `size` | No | Model size in GB (informational) |
+
+### recipe_options.json
+
+Location: `/var/lib/lemonade/.cache/lemonade/recipe_options.json`
+
+```json
+{
+  "user.gemma-4-31b-it": {
+    "ctx_size": 1572864,
+    "llamacpp_backend": "auto",
+    "llamacpp_args": "-b 8192 -ub 8192 -to 3600 -ctk q8_0 -ctv q8_0 --temp 1.0 --top-k 64 --top-p 0.95 --min-p 0.0 --repeat-penalty 1.0 --no-webui --threads-http -1 --threads -1 -np 6"
+  }
+}
+```
+
+### Recipe Options Fields
+
+| Field | Description |
+|-------|-------------|
+| `ctx_size` | Total context size (for all parallel slots) |
+| `llamacpp_backend` | Override backend for this model |
+| `llamacpp_args` | Custom llama.cpp arguments |
+
+### server_models.json
+
+Location: `/var/lib/lemonade/.cache/lemonade/server_models.json`
+
+Same structure as `user_models.json`. Used for server-suggested models
+that appear in the Lemonade desktop app.
+
+---
+
+## kilo.json (Kilo Code Config)
+
+### Location in Sandbox
+
+```
+/home/vscode/.config/kilo/config.json
+```
+
+### Structure
+
+```json
+{
+  "provider": {
+    "lemonade": {
+      "models": {
+        "user.gemma-4-31b-it": {
+          "name": "unsloth/gemma-4-31B-it-GGUF:Q8_K_XL",
+          "limit": {
+            "context": 262144,
+            "output": 4096
+          }
+        }
+      },
+      "options": {
+        "apiKey": "your-api-key",
+        "baseURL": "http://YOUR_IP:13305/v1"
+      }
+    }
+  },
+  "model": "lemonade/user.gemma-4-31b-it"
+}
+```
+
+### Fields
+
+| Field | Description |
+|-------|-------------|
+| `provider.<name>.models.<id>.name` | Display name (checkpoint) |
+| `provider.<name>.models.<id>.limit.context` | Max context tokens |
+| `provider.<name>.models.<id>.limit.output` | Max output tokens |
+| `provider.<name>.options.apiKey` | API key for authentication |
+| `provider.<name>.options.baseURL` | OpenAI-compatible API endpoint |
+| `model` | Active model (provider/model-id format) |
+
+---
+
+## VS Code Settings
+
+### vscode-settings.jsonc
+
+Injected into each sandbox at `/home/vscode/.local/share/code-server/User/settings.json`.
+
+Key settings for Lemonade integration:
+
+```json
+{
+  "kilo-code.new.showTaskTimeline": true,
+  "kilo-code.new.browserAutomation.enabled": true,
+  "telemetry.telemetryLevel": "off"
+}
+```
+
+---
+
+## Systemd Override
+
+### Location
+
+```
+/etc/systemd/system/lemonade-server.service.d/override.conf
+```
+
+### Structure
+
+```ini
+[Service]
+Environment="LEMONADE_API_KEY=your-api-key"
+Environment="LEMONADE_ADMIN_API_KEY=your-admin-key"
+```
+
+### Apply Changes
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart lemonade-server
+```

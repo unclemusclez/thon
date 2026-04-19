@@ -1,0 +1,112 @@
+---
+title: VS Code Remote - Multi-Instance Hackathon Example
+description: Run multiple VS Code sandbox instances with nginx SSL, groups-based user management, and optional local LLM inference
+---
+
+# VS Code Remote
+
+Run multiple VS Code sandbox instances concurrently with nginx SSL reverse proxy,
+groups-based user management, persistent workspaces, and optional local LLM inference
+via Lemonade Server.
+
+## Features
+
+- **Multi-Instance**: Multiple concurrent VS Code sandboxes from a single command
+- **Groups-Based**: Define users and groups in YAML for automatic instance creation
+- **SSL/TLS**: Automatic nginx reverse proxy with mkcert or openssl certificates
+- **Persistent Workspaces**: Optional host bind mounts for workspace persistence
+- **Local LLM**: Optional Lemonade Server integration for local inference
+- **Kilo Code Ready**: Auto-generated config for Kilo Code extension
+
+## Quick Start
+
+### 1. Prerequisites
+
+```bash
+# One-time host setup
+bash examples/vscode-remote/setup.sh
+```
+
+Installs: python3, nginx, docker.io, mkcert, openssl
+
+### 2. Build Docker Image
+
+```bash
+docker build -t opensandbox/vscode-remote:latest examples/vscode-remote/
+```
+
+### 3. Define Groups
+
+Create `groups.yaml`:
+
+```yaml
+groups:
+  alpha:
+    users:
+      - alice
+      - bob
+  beta:
+    users:
+      - dave
+```
+
+### 4. Run
+
+```bash
+python examples/vscode-remote/main.py --groups groups.yaml --external-ip 1.2.3.4
+```
+
+Each user gets their own VS Code sandbox at `https://<ip>/<endpoint_path>/`.
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         Host Machine                         │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │                    nginx (443)                       │    │
+│  │         SSL termination + WebSocket proxy           │    │
+│  └──────────────────────┬──────────────────────────────┘    │
+│                         │                                    │
+│  ┌──────────────────────┼──────────────────────────────┐    │
+│  │                Docker Network                        │    │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │    │
+│  │  │  Sandbox 1  │  │  Sandbox 2  │  │  Sandbox 3  │ │    │
+│  │  │ code-server │  │ code-server │  │ code-server │ │    │
+│  │  │   :8443     │  │   :8444     │  │   :8445     │ │    │
+│  │  └─────────────┘  └─────────────┘  └─────────────┘ │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │           Lemonade Server (Optional)                 │    │
+│  │              OpenAI-compatible API                   │    │
+│  │                   :13305                             │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Components
+
+| Component | Role |
+|-----------|------|
+| **main.py** | Orchestrates sandbox creation, nginx configs, workspace setup |
+| **nginx** | SSL termination + WebSocket proxy (per-port server blocks) |
+| **code-server** | VS Code in the browser, runs HTTP inside each sandbox |
+| **Lemonade Server** | Optional local LLM inference (OpenAI-compatible API) |
+
+### Network Modes
+
+Network mode is **auto-detected** from the server-returned endpoint format:
+
+| Mode | Endpoint Format | Detection |
+|------|----------------|-----------|
+| **Host** | `127.0.0.1:8443` | No `/` after port |
+| **Bridge** | `127.0.0.1:52322/proxy/8443` | `/proxy/` in endpoint |
+
+## Next Steps
+
+- [Installation Guide](./installation) - Detailed setup instructions
+- [Lemonade Server](./lemonade-server) - Local LLM inference setup
+- [Configuration](./configuration) - Full configuration reference
+- [CLI Reference](./cli-reference) - Command-line options
+- [Troubleshooting](./troubleshooting) - Common issues and solutions

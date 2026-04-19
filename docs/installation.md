@@ -1,0 +1,222 @@
+---
+title: Installation and Setup
+description: Complete installation guide for VS Code Remote example
+---
+
+# Installation and Setup
+
+## Prerequisites
+
+### System Requirements
+
+- **OS**: Linux (Ubuntu 20.04+ recommended)
+- **Docker**: 20.10+ with Docker daemon running
+- **Python**: 3.10+
+- **Memory**: 4GB+ RAM (8GB+ recommended for multiple instances)
+- **GPU**: AMD ROCm or NVIDIA CUDA (optional, for Lemonade inference)
+
+### Network Requirements
+
+- Ports 443 (nginx HTTPS) and 80 (nginx HTTP) available
+- Port 13305 available for Lemonade Server (optional)
+- Unique port per VS Code instance (starting from 8443 by default)
+
+## Step-by-Step Installation
+
+### 1. Clone Repository
+
+```bash
+git clone https://github.com/alibaba/OpenSandbox.git
+cd OpenSandbox
+```
+
+### 2. Run Setup Script
+
+```bash
+bash examples/vscode-remote/setup.sh
+```
+
+This installs:
+- **python3** and pip
+- **nginx** web server
+- **docker.io** container runtime
+- **mkcert** for local CA certificates
+- **openssl** as SSL fallback
+
+### 3. Build Docker Image
+
+```bash
+docker build -t opensandbox/vscode-remote:latest examples/vscode-remote/
+```
+
+The image includes:
+- **code-server**: VS Code in the browser
+- **Python 3.12**: Development environment
+- **Non-root user**: Security best practice
+
+### 4. Configure SSL Certificates
+
+#### Option A: mkcert (Recommended for Development)
+
+```bash
+# Install local CA
+mkcert -install
+
+# Generate certificate for your IP
+mkcert -cert-file /etc/nginx/ssl/server.crt \
+       -key-file /etc/nginx/ssl/server.key \
+       165.245.138.159 localhost
+```
+
+#### Option B: Let's Encrypt (Production)
+
+```bash
+sudo certbot certonly --standalone -d your-domain.com
+sudo cp /etc/letsencrypt/live/your-domain.com/fullchain.pem /etc/nginx/ssl/server.crt
+sudo cp /etc/letsencrypt/live/your-domain.com/privkey.pem /etc/nginx/ssl/server.key
+```
+
+### 5. Create Groups Configuration
+
+Create `groups.yaml` in your project directory:
+
+```yaml
+groups:
+  alpha:
+    users:
+      - alice
+      - bob
+  beta:
+    users:
+      - charlie
+      - dave
+  gamma:
+    users:
+      - eve
+```
+
+Each user gets:
+- Unique VS Code sandbox instance
+- Isolated workspace at `/workspace/{group}/{username}`
+- HTTPS URL at `https://{ip}/{endpoint_path}/`
+
+### 6. Run VS Code Instances
+
+```bash
+python examples/vscode-remote/main.py \
+    --groups groups.yaml \
+    --external-ip YOUR_EXTERNAL_IP
+```
+
+## Optional: Lemonade Server Setup
+
+For local LLM inference with Kilo Code, Continue, or Cline extensions:
+
+### Quick Setup
+
+```bash
+bash examples/vscode-remote/setup-lemonade.sh \
+    --groups groups.yaml \
+    --generate-keys \
+    --external-ip YOUR_EXTERNAL_IP
+```
+
+This will:
+1. Install Lemonade Server from PPA
+2. Configure for your GPU backend
+3. Generate API keys
+4. Download the default model (gemma-4-31b-it)
+5. Create `kilo.json` for Kilo Code
+
+### Custom llama.cpp Build (AMD MI300X)
+
+For optimal performance on AMD MI300X GPUs:
+
+```bash
+# Build llama.cpp with ROCm support
+bash examples/vscode-remote/build-amd-mi300x-llama-server.sh
+
+# Then run setup with system binary preference
+bash examples/vscode-remote/setup-lemonade.sh \
+    --groups groups.yaml \
+    --generate-keys \
+    --external-ip YOUR_EXTERNAL_IP
+```
+
+See [Lemonade Server](./lemonade-server) for detailed configuration options.
+
+## Running with Lemonade
+
+After setting up Lemonade Server:
+
+```bash
+python examples/vscode-remote/main.py \
+    --groups groups.yaml \
+    --external-ip YOUR_EXTERNAL_IP \
+    --lemonade kilo.json
+```
+
+This injects `kilo.json` into each sandbox at `/home/vscode/.config/kilo/config.json`,
+enabling Kilo Code to connect to your local LLM.
+
+## Verification
+
+### Check Services
+
+```bash
+# Docker is running
+docker ps
+
+# Nginx is configured
+ls /etc/nginx/sites-enabled/
+
+# Lemonade server is running (if configured)
+sudo systemctl status lemonade-server
+```
+
+### Access VS Code
+
+1. Open browser to the URL shown in terminal output
+2. For mkcert certificates, install the CA:
+   ```bash
+   # Download CA certificate
+   curl -o ca.crt https://YOUR_IP/ca.crt
+   
+   # Install in browser (varies by browser)
+   # Chrome: Settings > Privacy > Certificates > Authorities > Import
+   # Firefox: Settings > Privacy > Certificates > View Certificates > Authorities > Import
+   ```
+
+## Uninstallation
+
+### Remove VS Code Instances
+
+```bash
+# Clean up nginx configs
+python examples/vscode-remote/main.py --cleanup
+
+# Stop all sandboxes (via Docker)
+docker ps -q | xargs -r docker stop
+```
+
+### Remove Lemonade Server
+
+```bash
+sudo systemctl stop lemonade-server
+sudo apt-get remove --purge lemonade-server
+sudo rm -rf /var/lib/lemonade
+sudo rm -rf /etc/systemd/system/lemonade-server.service.d
+```
+
+### Remove All
+
+```bash
+# Remove packages
+sudo apt-get remove --purge nginx docker.io mkcert
+
+# Remove certificates
+sudo rm -rf /etc/nginx/ssl
+
+# Remove Docker image
+docker rmi opensandbox/vscode-remote:latest
+```
