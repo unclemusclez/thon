@@ -1,3 +1,7 @@
+# Migrating project to https://github.com/WaterPistolAI/thon.git
+
+This project will be archived
+
 # VS Code Remote - Multi-Instance Hackathon Example
 
 Run multiple VS Code sandbox instances concurrently with nginx SSL reverse proxy,
