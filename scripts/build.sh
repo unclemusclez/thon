@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TAG=${TAG:-latest}
 PUSH=${PUSH:-false}
 
-if [ "$PUSH" = "true" ]; then
+if [ "$PUSH" = "false" ]; then
   docker buildx rm thon-builder || true
   docker buildx create --use --name thon-builder
   docker buildx inspect --bootstrap
