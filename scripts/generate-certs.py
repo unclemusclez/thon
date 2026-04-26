@@ -23,7 +23,7 @@ It creates:
 3. Optional per-sandbox certificates
 
 Usage:
-    uv run python examples/vscode-remote/generate-certs.py [--per-sandbox]
+    uv run python ./generate-certs.py [--per-sandbox]
 
 Requirements:
     - mkcert installed (https://github.com/FiloSottile/mkcert)
@@ -153,13 +153,13 @@ def main():
         epilog="""
 Examples:
   # Install mkcert CA and generate wildcard cert
-  uv run python examples/vscode-remote/generate-certs.py
+  uv run python ./generate-certs.py
 
   # Generate per-sandbox certificates
-  uv run python examples/vscode-remote/generate-certs.py --per-sandbox
+  uv run python ./generate-certs.py --per-sandbox
 
   # Generate certs for specific sandbox IDs
-  uv run python examples/vscode-remote/generate-certs.py --sandbox sandbox1 --sandbox sandbox2
+  uv run python ./generate-certs.py --sandbox sandbox1 --sandbox sandbox2
         """,
     )
 

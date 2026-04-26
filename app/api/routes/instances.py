@@ -70,7 +70,7 @@ async def list_instances(
     svc = _get_service()
     instances, total = await svc.list_instances(
         states=state,
-        metadata_filter={"managed-by": "vscode-remote-client"},
+        metadata_filter={"managed-by": "thon-client"},
         page=page,
         page_size=page_size,
     )

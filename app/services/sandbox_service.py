@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Sandbox service wrapping OpenSandbox SDK SandboxManager for fleet operations."""
+"""Sandbox service wrapping sandbox SDK SandboxManager for fleet operations."""
 
 import asyncio
 import logging
@@ -42,7 +42,7 @@ DEFAULT_PORT = 8443
 class SandboxService:
     """High-level service for managing VS Code sandbox instances.
 
-    Wraps the OpenSandbox SDK's ``SandboxManager`` for fleet-level operations
+    Wraps the ``SandboxManager`` for fleet-level operations
     (list, kill, pause, resume) and ``Sandbox`` for single-instance interaction
     (create, run commands, get endpoints).
     """
@@ -201,7 +201,7 @@ class SandboxService:
             "group": user.group,
             "username": user.username,
             "port": str(port),
-            "managed-by": "vscode-remote-client",
+            "managed-by": "thon-client",
         }
 
         sandbox = await Sandbox.create(

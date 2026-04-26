@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""VS Code Remote Client - Dashboard and CLI for managing OpenSandbox instances."""
+"""THON - The Hackathon Organizer Node - Dashboard and CLI for managing sandbox instances."""

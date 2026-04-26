@@ -1,8 +1,6 @@
-# Migrating project to https://github.com/WaterPistolAI/thon.git
+# THON - The Hackathon Organizer Node
 
-This project will be archived
-
-# VS Code Remote - Multi-Instance Hackathon Example
+> Migrated to https://github.com/WaterPistolAI/thon.git
 
 Run multiple VS Code sandbox instances concurrently with nginx SSL reverse proxy,
 groups-based user management, persistent workspaces, and optional local LLM inference
@@ -17,7 +15,7 @@ https://youtu.be/YptAQQf_4dg
 ### 1. One-time Setup
 
 ```bash
-bash examples/vscode-remote/setup.sh
+bash ./setup.sh
 ```
 
 Installs python3, nginx, docker.io, mkcert, and openssl.
@@ -25,7 +23,7 @@ Installs python3, nginx, docker.io, mkcert, and openssl.
 ### 2. Build the Docker Image
 
 ```bash
-docker build -t opensandbox/vscode-remote:latest examples/vscode-remote/
+docker build -t waterpistol/thon:latest ./
 ```
 
 ### 3. Define Groups
@@ -46,7 +44,7 @@ groups:
 ### 4. Run
 
 ```bash
-python examples/vscode-remote/main.py --groups groups.yaml --external-ip 1.2.3.4
+python ./main.py --groups groups.yaml --external-ip 1.2.3.4
 ```
 
 Each user gets their own VS Code sandbox at `https://<ip>/<endpoint_path>/`.
@@ -98,7 +96,7 @@ python main.py [OPTIONS]
 | `--timeout MIN` | Sandbox timeout in minutes | `0` (no timeout) |
 | `--domain DOMAIN` | Sandbox server domain | `localhost:8080` |
 | `--api-key KEY` | Sandbox API key | (none) |
-| `--image IMAGE` | Docker image | `opensandbox/vscode-remote:latest` |
+| `--image IMAGE` | Docker image | `waterpistol/thon:latest` |
 | `--python-version VER` | Python version in sandbox | `3.11` |
 | `--secure` | Enable per-user passwords | `false` |
 | `--external-ip IP` | External IP for SSL and URLs | auto-detected |
@@ -149,14 +147,14 @@ inside sandbox containers. Runs as a **systemd service** on the host.
 
 ```bash
 # Full setup (install + configure + API keys + pull model + kilo.json)
-bash examples/vscode-remote/setup-lemonade.sh \
+bash ./setup-lemonade.sh \
     --groups groups.yaml --generate-keys --external-ip 1.2.3.4
 ```
 
 Or use the Python wrapper:
 
 ```bash
-python examples/vscode-remote/lemonade_server.py run \
+python ./lemonade_server.py run \
     --groups groups.yaml --generate-keys --external-ip 1.2.3.4
 ```
 
@@ -224,7 +222,7 @@ Lemonade-managed args (reserved, must NOT appear in `llamacpp_args`):
 ### Building llama.cpp from Source (AMD MI300X)
 
 ```bash
-bash examples/vscode-remote/build-amd-mi300x-llama-server.sh
+bash ./build-amd-mi300x-llama-server.sh
 ```
 
 Builds llama.cpp with ROCm/HIP for `gfx942` and installs to `/usr/local`. The Lemonade
@@ -287,7 +285,7 @@ Lemonade manages these arguments internally and rejects them in `llamacpp_args`:
 |----------|-------------|---------|
 | `SANDBOX_DOMAIN` | Sandbox server address | `localhost:8080` |
 | `SANDBOX_API_KEY` | Sandbox API key | (none) |
-| `SANDBOX_IMAGE` | Docker image | `opensandbox/vscode-remote:latest` |
+| `SANDBOX_IMAGE` | Docker image | `waterpistol/thon:latest` |
 | `PYTHON_VERSION` | Python version in sandbox | `3.11` |
 | `LEMONADE_API_KEY` | Lemonade API key (regular) | (none) |
 | `LEMONADE_ADMIN_API_KEY` | Lemonade admin key (elevated) | (none) |

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Core domain models for VS Code Remote Client."""
+"""Core domain models for THON."""
 
 from __future__ import annotations
 

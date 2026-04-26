@@ -44,7 +44,7 @@ and supports GPU acceleration via ROCm, CUDA, or Vulkan.
 ### One-Command Setup
 
 ```bash
-bash examples/vscode-remote/setup-lemonade.sh \
+bash ./setup-lemonade.sh \
     --groups groups.yaml \
     --generate-keys \
     --external-ip YOUR_IP
@@ -220,7 +220,7 @@ curl -H "Authorization: Bearer your_key" http://localhost:13305/v1/chat/completi
 ### AMD MI300X (gfx942)
 
 ```bash
-bash examples/vscode-remote/build-amd-mi300x-llama-server.sh
+bash ./build-amd-mi300x-llama-server.sh
 ```
 
 This builds llama.cpp with:
@@ -245,7 +245,7 @@ Modify `build-amd-mi300x-llama-server.sh` for your architecture:
 ### Generate Config
 
 ```bash
-bash examples/vscode-remote/setup-lemonade.sh \
+bash ./setup-lemonade.sh \
     --groups groups.yaml \
     --generate-keys \
     --external-ip YOUR_IP
@@ -279,7 +279,7 @@ Creates `kilo.json`:
 ### Inject into Sandboxes
 
 ```bash
-python examples/vscode-remote/main.py \
+python ./main.py \
     --groups groups.yaml \
     --external-ip YOUR_IP \
     --lemonade kilo.json

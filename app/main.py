@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""FastAPI application entry point for VS Code Remote Client dashboard."""
+"""FastAPI application entry point for THON dashboard."""
 
 import logging
 from contextlib import asynccontextmanager
@@ -59,10 +59,10 @@ def get_lemonade_service() -> LemonadeService:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     svc = get_sandbox_service()
-    logger.info("VS Code Remote Client dashboard starting")
+    logger.info("THON dashboard starting")
     yield
     await svc.close()
-    logger.info("VS Code Remote Client dashboard stopped")
+    logger.info("THON dashboard stopped")
 
 
 def create_app(config: AppConfig | None = None) -> FastAPI:
@@ -71,8 +71,8 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
         _app_config = config
 
     app = FastAPI(
-        title="VS Code Remote Client",
-        description="Dashboard for managing OpenSandbox VS Code instances and Lemonade inference",
+        title="THON",
+        description="Dashboard for managing THON VS Code instances and Lemonade inference",
         version="0.1.0",
         lifespan=lifespan,
     )
@@ -94,7 +94,7 @@ def create_app(config: AppConfig | None = None) -> FastAPI:
         index_path = static_dir / "index.html"
         if index_path.exists():
             return FileResponse(str(index_path))
-        return {"message": "VS Code Remote Client API", "docs": "/docs"}
+        return {"message": "THON API", "docs": "/docs"}
 
     return app
 

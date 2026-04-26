@@ -6,13 +6,13 @@
 #
 # Usage:
 #   # Run all groups
-#   uv run python examples/vscode-remote/main.py --groups groups.yaml
+#   uv run python ./main.py --groups groups.yaml
 #
 #   # Run a single group
-#   uv run python examples/vscode-remote/main.py --groups groups.yaml --group alpha
+#   uv run python ./main.py --groups groups.yaml --group alpha
 #
 #   # Run with secure auth (generates per-user passwords)
-#   uv run python examples/vscode-remote/main.py --groups groups.yaml --secure
+#   uv run python ./main.py --groups groups.yaml --secure
 
 groups:
   alpha:

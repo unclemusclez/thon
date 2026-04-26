@@ -22,11 +22,11 @@ from typing import Optional
 
 @dataclass
 class SandboxConfig:
-    """OpenSandbox server connection settings."""
+    """Sandbox server connection settings."""
 
     domain: str = field(default_factory=lambda: os.getenv("SANDBOX_DOMAIN", "localhost:8080"))
     api_key: Optional[str] = field(default_factory=lambda: os.getenv("SANDBOX_API_KEY"))
-    image: str = field(default_factory=lambda: os.getenv("SANDBOX_IMAGE", "opensandbox/vscode-remote:latest"))
+    image: str = field(default_factory=lambda: os.getenv("SANDBOX_IMAGE", "waterpistol/thon:latest"))
     request_timeout_seconds: int = 60
 
 

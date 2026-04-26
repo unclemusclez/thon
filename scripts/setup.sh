@@ -70,14 +70,14 @@ sudo mkcert -install 2>/dev/null || mkcert -install 2>/dev/null || {
 
 CAROOT=$(mkcert -caroot 2>/dev/null || true)
 
-# Clone and build if running standalone (not from inside the repo)
-REPO_DIR="${SCRIPT_DIR}/../.."
-REPO_DIR="$(cd "${REPO_DIR}" && pwd)"
-if [[ ! -f "${REPO_DIR}/server/pyproject.toml" ]]; then
-    echo "[Setup] Cloning OpenSandbox repository..."
-    git clone https://github.com/unclemusclez/OpenSandbox.git ~/OpenSandbox
-    REPO_DIR=~/OpenSandbox
-fi
+# # Clone and build if running standalone (not from inside the repo)
+# REPO_DIR="${SCRIPT_DIR}/../.."
+# REPO_DIR="$(cd "${REPO_DIR}" && pwd)"
+# if [[ ! -f "${REPO_DIR}/server/pyproject.toml" ]]; then
+#     echo "[Setup] Cloning OpenSandbox repository..."
+#     git clone https://github.com/unclemusclez/OpenSandbox.git ~/OpenSandbox
+#     REPO_DIR=~/OpenSandbox
+# fi
 
 echo "[Setup] Building Docker image..."
 docker build -t opensandbox/vscode:latest -f "${SCRIPT_DIR}/Dockerfile" "${REPO_DIR}"

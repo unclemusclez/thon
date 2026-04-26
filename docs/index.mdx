@@ -1,9 +1,9 @@
 ---
-title: VS Code Remote - Multi-Instance Hackathon Example
+title: THON - The Hackathon Organizer Node
 description: Run multiple VS Code sandbox instances with nginx SSL, groups-based user management, and optional local LLM inference
 ---
 
-# VS Code Remote
+# THON
 
 Run multiple VS Code sandbox instances concurrently with nginx SSL reverse proxy,
 groups-based user management, persistent workspaces, and optional local LLM inference
@@ -24,7 +24,7 @@ via Lemonade Server.
 
 ```bash
 # One-time host setup
-bash examples/vscode-remote/setup.sh
+bash ./setup.sh
 ```
 
 Installs: python3, nginx, docker.io, mkcert, openssl
@@ -32,7 +32,7 @@ Installs: python3, nginx, docker.io, mkcert, openssl
 ### 2. Build Docker Image
 
 ```bash
-docker build -t opensandbox/vscode-remote:latest examples/vscode-remote/
+docker build -t waterpistol/thon:latest ./
 ```
 
 ### 3. Define Groups
@@ -53,7 +53,7 @@ groups:
 ### 4. Run
 
 ```bash
-python examples/vscode-remote/main.py --groups groups.yaml --external-ip 1.2.3.4
+python ./main.py --groups groups.yaml --external-ip 1.2.3.4
 ```
 
 Each user gets their own VS Code sandbox at `https://<ip>/<endpoint_path>/`.

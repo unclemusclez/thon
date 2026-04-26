@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# VS Code Remote Sandbox Image
+# THON - The Hackathon Organizer Node Sandbox Image
 # This Dockerfile builds a sandbox image with code-server pre-installed
-# for the multi-instance VS Code remote example.
+# for multi-instance VS Code remote hackathon environments.
 #
 # HTTPS Support:
 #   - By default, code-server runs over HTTP
@@ -58,7 +58,7 @@ WORKDIR /workspace
 USER vscode
 
 # Install VS Code extensions from extensions.txt
-COPY --chown=vscode:vscode examples/vscode-remote/extensions.txt /tmp/extensions.txt
+COPY --chown=vscode:vscode ./extensions.txt /tmp/extensions.txt
 RUN while IFS= read -r ext; do \
       ext="$(echo "$ext" | tr -d '\r')"; \
       [ -z "$ext" ] && continue; \

@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Custom exceptions for VS Code Remote Client."""
+"""Custom exceptions for THON."""
 
 
 class VSCRemoteError(Exception):
-    """Base exception for all vscode-remote errors."""
+    """Base exception for all thon errors."""
 
 
 class ConfigError(VSCRemoteError):

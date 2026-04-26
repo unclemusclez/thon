@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-VS Code Remote - Multi-Instance Hackathon Example
+THON - The Hackathon Organizer Node
 
 Runs multiple VS Code sandbox instances driven by a groups.yaml config.
 Each user gets their own sandbox with workspace at /workspace/{group}/{username}.
@@ -24,28 +24,28 @@ The displayed URL includes the full endpoint path so browsers hit execd correctl
 
 Usage:
     # Setup (one-time)
-    bash examples/vscode-remote/setup.sh
+    bash ./setup.sh
 
     # Run all groups (nginx+SSL on by default)
-    python examples/vscode-remote/main.py --groups groups.yaml --external-ip 165.245.138.159
+    python ./main.py --groups groups.yaml --external-ip 165.245.138.159
 
     # Run a single group
-    python examples/vscode-remote/main.py --groups groups.yaml --group alpha --external-ip 1.2.3.4
+    python ./main.py --groups groups.yaml --group alpha --external-ip 1.2.3.4
 
     # Auto-detect external IP
-    python examples/vscode-remote/main.py --groups groups.yaml
+    python ./main.py --groups groups.yaml
 
     # With per-user passwords
-    python examples/vscode-remote/main.py --groups groups.yaml --secure --external-ip 1.2.3.4
+    python ./main.py --groups groups.yaml --secure --external-ip 1.2.3.4
 
     # Direct HTTP without nginx
-    python examples/vscode-remote/main.py --no-nginx
+    python ./main.py --no-nginx
 
     # With persistent workspace bind mounts
-    python examples/vscode-remote/main.py --groups groups.yaml --workspace-dir /vs-code-remote
+    python ./main.py --groups groups.yaml --workspace-dir /vs-code-remote
 
     # Cleanup all nginx configs
-    python examples/vscode-remote/main.py --cleanup
+    python ./main.py --cleanup
 """
 
 import argparse
@@ -374,7 +374,7 @@ Examples:
         "--image",
         type=str,
         default=None,
-        help="Docker image for sandbox (default: opensandbox/vscode-remote:latest)",
+        help="Docker image for sandbox (default: waterpistol/thon:latest)",
     )
     parser.add_argument(
         "--python-version",
@@ -452,7 +452,7 @@ Examples:
 
     domain = args.domain or os.getenv("SANDBOX_DOMAIN", "localhost:8080")
     api_key = args.api_key or os.getenv("SANDBOX_API_KEY")
-    image = args.image or os.getenv("SANDBOX_IMAGE", "opensandbox/vscode-remote:latest")
+    image = args.image or os.getenv("SANDBOX_IMAGE", "waterpistol/thon:latest")
     python_version = args.python_version or os.getenv("PYTHON_VERSION", "3.11")
 
     groups_path = resolve_path(args.groups) if args.groups else None

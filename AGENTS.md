@@ -1,20 +1,20 @@
 # VS Code Remote Example AGENTS
 
-Use this file for all work in `examples/vscode-remote/`. Reference template: `examples/vscode/`.
+Use this file for all work in `./`. Reference template: `examples/vscode/`.
 This is a hackathon-focused multi-instance VS Code remote development tool with nginx
 reverse proxy (SSL via mkcert/openssl), groups support, persistent workspace bind mounts,
 and optional local LLM inference via Lemonade Server.
 
 ## Scope
 
-- `examples/vscode-remote/**` — all files in this directory
+- `./**` — all files in this directory
 - Reference: `examples/vscode/main.py` — simple single-instance pattern
 
 ## Commands
 
 ```bash
 # One-time prerequisite installation (python3, nginx, docker, mkcert, openssl)
-bash examples/vscode-remote/setup.sh
+bash ./setup.sh
 
 # Lint
 pip run ruff check .
@@ -26,34 +26,34 @@ pip run ruff format .
 pip run pyright
 
 # Run: all groups from groups.yaml with nginx + SSL (default)
-python examples/vscode-remote/main.py --groups groups.yaml --external-ip 165.245.138.159
+python ./main.py --groups groups.yaml --external-ip 165.245.138.159
 
 # Run: single group
-python examples/vscode-remote/main.py --groups groups.yaml --group alpha --external-ip 1.2.3.4
+python ./main.py --groups groups.yaml --group alpha --external-ip 1.2.3.4
 
 # Run: with secure per-user passwords
-python examples/vscode-remote/main.py --groups groups.yaml --secure --external-ip 1.2.3.4
+python ./main.py --groups groups.yaml --secure --external-ip 1.2.3.4
 
 # Run: with persistent workspace bind mounts
-python examples/vscode-remote/main.py --groups groups.yaml --workspace-dir /vs-code-remote
+python ./main.py --groups groups.yaml --workspace-dir /vs-code-remote
 
 # Run: single instance without groups (like examples/vscode/main.py)
-python examples/vscode-remote/main.py
+python ./main.py
 
 # Run: direct HTTP without nginx
-python examples/vscode-remote/main.py --no-nginx
+python ./main.py --no-nginx
 
 # Cleanup all nginx configs
-python examples/vscode-remote/main.py --cleanup
+python ./main.py --cleanup
 
 # Build Docker image
-docker build -t opensandbox/vscode:latest examples/vscode-remote/
+docker build -t waterpistol/thon:latest ./
 
 # Lemonade Server: full setup via shell (recommended — service manages its own lifecycle)
-bash examples/vscode-remote/setup-lemonade.sh --groups groups.yaml --generate-keys --external-ip 1.2.3.4
+bash ./setup-lemonade.sh --groups groups.yaml --generate-keys --external-ip 1.2.3.4
 
 # Lemonade Server: full setup via Python wrapper (alternative)
-python examples/vscode-remote/lemonade_server.py run --groups groups.yaml --generate-keys --external-ip 1.2.3.4
+python ./lemonade_server.py run --groups groups.yaml --generate-keys --external-ip 1.2.3.4
 
 # Lemonade Server: service management (it runs as systemd, no long-running process needed)
 sudo systemctl status lemonade-server
@@ -66,7 +66,7 @@ lemonade pull unsloth/gemma-4-31B-it-GGUF:Q8_K_XL
 lemonade config set llamacpp.backend=auto host=0.0.0.0
 
 # Run VS Code instances with Lemonade inference (injects kilo.json into each sandbox)
-python examples/vscode-remote/main.py --groups groups.yaml --external-ip 1.2.3.4 --lemonade kilo.json
+python ./main.py --groups groups.yaml --external-ip 1.2.3.4 --lemonade kilo.json
 ```
 
 ## Code Style
@@ -329,7 +329,7 @@ python main.py --groups groups.yaml --external-ip 1.2.3.4 --lemonade kilo.json
 - Use `--external-ip` when accessing via IP address (prevents SW SSL errors)
 - Auto-detect network mode from endpoint format, NOT from a CLI flag
 - Use `pip install` (not `uv`) — user's intentional choice
-- Use repo URL `https://github.com/unclemusclez/OpenSandbox.git` in setup.sh
+- Use image `waterpistol/thon:latest` for Docker builds
 
 ### Must Never
 - Commit secrets, API keys, or `.key` files to the repository
@@ -367,7 +367,7 @@ extensions making cross-site requests to github.com — cannot be fixed server-s
 **Environment Variables**:
 - `SANDBOX_DOMAIN` — server address (default: `localhost:8080`)
 - `SANDBOX_API_KEY` — optional API key
-- `SANDBOX_IMAGE` — Docker image (default: `opensandbox/vscode:latest`)
+- `SANDBOX_IMAGE` — Docker image (default: `waterpistol/thon:latest`)
 - `PYTHON_VERSION` — Python version in sandbox (default: `3.11`)
 - `LEMONADE_API_KEY` — Lemonade server API key for regular endpoints
 - `LEMONADE_ADMIN_API_KEY` — Lemonade server admin key (elevated access)
@@ -405,7 +405,7 @@ extensions making cross-site requests to github.com — cannot be fixed server-s
 | `app/config.py` | `AppConfig` and sub-configs; loaded from env vars (`SANDBOX_*`, `LEMONADE_*`, `DASHBOARD_*`, `AUTH_*`) |
 | `app/models.py` | Pydantic domain models: `InstanceInfo`, `InstanceState`, `UserInfo`, `LemonadeStatus`, `GroupConfig` |
 | `app/exceptions.py` | Custom exceptions: `VSCRemoteError`, `SandboxCreateError`, `LemonadeConnectionError`, `AuthError`, etc. |
-| `app/services/sandbox_service.py` | `SandboxService` — wraps OpenSandbox SDK `SandboxManager` for fleet CRUD (list, create, pause, resume, kill, renew) |
+| `app/services/sandbox_service.py` | `SandboxService` — wraps sandbox SDK `SandboxManager` for fleet CRUD (list, create, pause, resume, kill, renew) |
 | `app/services/lemonade_service.py` | `LemonadeService` — Lemonade server status monitoring, model listing, API info |
 | `app/api/routes/instances.py` | REST API: `GET/POST /api/instances`, `POST pause/resume`, `DELETE`, `POST bulk/*` |
 | `app/api/routes/lemonade.py` | REST API: `GET /api/lemonade/status`, `/models`, `/api-info` |
@@ -429,7 +429,7 @@ extensions making cross-site requests to github.com — cannot be fixed server-s
 ```
 app/main.py          → FastAPI app, lifespan, static mounts
 app/api/routes/      → REST API route handlers
-app/services/        → Business logic layer (wraps OpenSandbox SDK + Lemonade)
+app/services/        → Business logic layer (wraps sandbox SDK + Lemonade)
 app/auth/            → OIDC providers, session store, FastAPI deps
 app/config.py        → Environment-driven configuration
 app/models.py        → Pydantic domain models
@@ -468,9 +468,9 @@ app/models.py        → Pydantic domain models
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `SANDBOX_DOMAIN` | `localhost:8080` | OpenSandbox server address |
-| `SANDBOX_API_KEY` | (none) | OpenSandbox API key |
-| `SANDBOX_IMAGE` | `opensandbox/vscode-remote:latest` | Docker image for sandboxes |
+| `SANDBOX_DOMAIN` | `localhost:8080` | Sandbox server address |
+| `SANDBOX_API_KEY` | (none) | Sandbox API key |
+| `SANDBOX_IMAGE` | `waterpistol/thon:latest` | Docker image for sandboxes |
 | `LEMONADE_HOST` | `0.0.0.0` | Lemonade server bind address |
 | `LEMONADE_PORT` | `13305` | Lemonade server port |
 | `LEMONADE_API_KEY` | (none) | Lemonade API key |
@@ -512,5 +512,5 @@ python -m app.main
 - **WebSocket real-time updates** — live instance state changes pushed to dashboard
 - **Instance templates** — pre-configured sandbox setups (image, extensions, env)
 - **Usage analytics** — per-user resource usage, token consumption
-- **Multi-server support** — manage sandboxes across multiple OpenSandbox servers
-- **Kubernetes native** — deploy dashboard as a Kubernetes resource alongside OpenSandbox
+- **Multi-server support** — manage sandboxes across multiple servers
+- **Kubernetes native** — deploy dashboard as a Kubernetes resource

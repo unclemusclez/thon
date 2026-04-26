@@ -16,27 +16,18 @@
 set -ex
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 TAG=${TAG:-latest}
 PUSH=${PUSH:-false}
 
 if [ "$PUSH" = "true" ]; then
-  docker buildx rm vscode-remote-builder || true
-  docker buildx create --use --name vscode-remote-builder
+  docker buildx rm thon-builder || true
+  docker buildx create --use --name thon-builder
   docker buildx inspect --bootstrap
   docker buildx ls
   docker buildx build \
-    -t opensandbox/vscode-remote:${TAG} \
-    -t sandbox-registry.cn-zhangjiakou.cr.aliyuncs.com/opensandbox/vscode-remote:${TAG} \
-    --platform linux/amd64,linux/arm64 \
-    -f examples/vscode-remote/Dockerfile \
-    --push \
-    "${REPO_DIR}"
-else
-  docker buildx build \
-    -t opensandbox/vscode-remote:${TAG} \
-    -f examples/vscode-remote/Dockerfile \
+    -t waterpistol/thon:${TAG} \
+    -f Dockerfile \
     --load \
-    "${REPO_DIR}"
+    "${SCRIPT_DIR}"
 fi

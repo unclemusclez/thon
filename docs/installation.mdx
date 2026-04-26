@@ -1,6 +1,6 @@
 ---
 title: Installation and Setup
-description: Complete installation guide for VS Code Remote example
+description: Complete installation guide for THON - The Hackathon Organizer Node
 ---
 
 # Installation and Setup
@@ -26,14 +26,14 @@ description: Complete installation guide for VS Code Remote example
 ### 1. Clone Repository
 
 ```bash
-git clone https://github.com/alibaba/OpenSandbox.git
-cd OpenSandbox
+git clone https://github.com/WaterPistolAI/thon.git
+cd thon
 ```
 
 ### 2. Run Setup Script
 
 ```bash
-bash examples/vscode-remote/setup.sh
+bash ./setup.sh
 ```
 
 This installs:
@@ -46,7 +46,7 @@ This installs:
 ### 3. Build Docker Image
 
 ```bash
-docker build -t opensandbox/vscode-remote:latest examples/vscode-remote/
+docker build -t waterpistol/thon:latest ./
 ```
 
 The image includes:
@@ -103,7 +103,7 @@ Each user gets:
 ### 6. Run VS Code Instances
 
 ```bash
-python examples/vscode-remote/main.py \
+python ./main.py \
     --groups groups.yaml \
     --external-ip YOUR_EXTERNAL_IP
 ```
@@ -115,7 +115,7 @@ For local LLM inference with Kilo Code, Continue, or Cline extensions:
 ### Quick Setup
 
 ```bash
-bash examples/vscode-remote/setup-lemonade.sh \
+bash ./setup-lemonade.sh \
     --groups groups.yaml \
     --generate-keys \
     --external-ip YOUR_EXTERNAL_IP
@@ -134,10 +134,10 @@ For optimal performance on AMD MI300X GPUs:
 
 ```bash
 # Build llama.cpp with ROCm support
-bash examples/vscode-remote/build-amd-mi300x-llama-server.sh
+bash ./build-amd-mi300x-llama-server.sh
 
 # Then run setup with system binary preference
-bash examples/vscode-remote/setup-lemonade.sh \
+bash ./setup-lemonade.sh \
     --groups groups.yaml \
     --generate-keys \
     --external-ip YOUR_EXTERNAL_IP
@@ -150,7 +150,7 @@ See [Lemonade Server](./lemonade-server) for detailed configuration options.
 After setting up Lemonade Server:
 
 ```bash
-python examples/vscode-remote/main.py \
+python ./main.py \
     --groups groups.yaml \
     --external-ip YOUR_EXTERNAL_IP \
     --lemonade kilo.json
@@ -193,7 +193,7 @@ sudo systemctl status lemonade-server
 
 ```bash
 # Clean up nginx configs
-python examples/vscode-remote/main.py --cleanup
+python ./main.py --cleanup
 
 # Stop all sandboxes (via Docker)
 docker ps -q | xargs -r docker stop
@@ -218,5 +218,5 @@ sudo apt-get remove --purge nginx docker.io mkcert
 sudo rm -rf /etc/nginx/ssl
 
 # Remove Docker image
-docker rmi opensandbox/vscode-remote:latest
+docker rmi waterpistol/thon:latest
 ```

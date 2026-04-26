@@ -1,6 +1,6 @@
 ---
 title: CLI Reference
-description: Complete command-line reference for VS Code Remote and Lemonade Server
+description: Complete command-line reference for THON and Lemonade Server
 ---
 
 # CLI Reference
@@ -10,7 +10,7 @@ description: Complete command-line reference for VS Code Remote and Lemonade Ser
 ### Synopsis
 
 ```bash
-python examples/vscode-remote/main.py [OPTIONS]
+python ./main.py [OPTIONS]
 ```
 
 ### Options
@@ -35,7 +35,7 @@ python examples/vscode-remote/main.py [OPTIONS]
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `--image IMAGE` | string | opensandbox/vscode-remote:latest | Docker image for sandbox |
+| `--image IMAGE` | string | waterpistol/thon:latest | Docker image for sandbox |
 | `--python-version VER` | string | 3.11 | Python version in sandbox |
 
 #### Security
@@ -136,7 +136,7 @@ python main.py --cleanup
 ### Synopsis
 
 ```bash
-bash examples/vscode-remote/setup-lemonade.sh [OPTIONS]
+bash ./setup-lemonade.sh [OPTIONS]
 ```
 
 ### Options
@@ -218,7 +218,7 @@ bash setup-lemonade.sh \
 ### Synopsis
 
 ```bash
-python examples/vscode-remote/lemonade_server.py COMMAND [OPTIONS]
+python ./lemonade_server.py COMMAND [OPTIONS]
 ```
 
 ### Commands
@@ -359,7 +359,7 @@ python lemonade_server.py generate-kilo-config --admin-api-key YOUR_KEY --extern
 |----------|---------|-------------|
 | `SANDBOX_DOMAIN` | localhost:8080 | Sandbox server address |
 | `SANDBOX_API_KEY` | (none) | Sandbox API key |
-| `SANDBOX_IMAGE` | opensandbox/vscode-remote:latest | Docker image |
+| `SANDBOX_IMAGE` | waterpistol/thon:latest | Docker image |
 | `PYTHON_VERSION` | 3.11 | Python in sandbox |
 
 ### Lemonade Server
