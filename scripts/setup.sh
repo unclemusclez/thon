@@ -69,9 +69,9 @@ sudo mkcert -install 2>/dev/null || mkcert -install 2>/dev/null || {
 }
 
 CAROOT=$(mkcert -caroot 2>/dev/null || true)
-
+REPO_DIR="${SCRIPT_DIR}/.."
 # # Clone and build if running standalone (not from inside the repo)
-# REPO_DIR="${SCRIPT_DIR}/../.."
+
 # REPO_DIR="$(cd "${REPO_DIR}" && pwd)"
 # if [[ ! -f "${REPO_DIR}/server/pyproject.toml" ]]; then
 #     echo "[Setup] Cloning OpenSandbox repository..."
