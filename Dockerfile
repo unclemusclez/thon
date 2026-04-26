@@ -29,13 +29,12 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=1
 
-# Dotnet
-Run wget https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-RUN dpkg -i packages-microsoft-prod.deb
+
 
 # Install dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt update && apt install -y --no-install-recommends \
     curl \
+    wget \
     git \
     openssh-client \
     gnupg \
@@ -45,12 +44,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     vim \
     nano \
     sudo \
-    python \
-    python-venv\
-    python-pip \
+    python3 \
+    python3-venv\
+    python3-pip \
+    python-is-python3 \
     nodejs \
     npm \
     && rm -rf /var/lib/apt/lists/*
+
+# Dotnet
+Run wget https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+RUN dpkg -i packages-microsoft-prod.deb
+RUN apt update
 
 RUN npm install -g pnpm npx
 # Install code-server
@@ -72,7 +77,7 @@ WORKDIR /workspace
 USER vscode
 
 # Install VS Code extensions from extensions.txt
-COPY --chown=vscode:vscode ./config/extensions.txt.example /tmp/extensions.txt
+COPY --chown=vscode:vscode config/extensions.txt.example /tmp/extensions.txt
 RUN while IFS= read -r ext; do \
       ext="$(echo "$ext" | tr -d '\r')"; \
       [ -z "$ext" ] && continue; \

@@ -80,14 +80,12 @@ REPO_DIR="${SCRIPT_DIR}/.."
 # fi
 
 echo "[Setup] Building Docker image..."
-docker build -t opensandbox/vscode:latest -f "${SCRIPT_DIR}/Dockerfile" "${REPO_DIR}"
+docker build -t waterpistol/thon:latest -f "${REPO_DIR}/Dockerfile" "${REPO_DIR}"
 
 echo "[Setup] Installing OpenSandbox server and CLI..."
 python3 -m venv ~/.venv
 . ~/.venv/bin/activate
-pip install "${REPO_DIR}/server"
-cp "${REPO_DIR}/server/opensandbox_server/examples/example.config.toml" ~/.sandbox.toml
-pip install "${REPO_DIR}/cli"
+pip install opensandbox opensandbox-cli
 
 echo "[Setup] Adding user to docker group..."
 sudo usermod -aG docker "$USER"
@@ -106,7 +104,7 @@ echo "     bash ${SCRIPT_DIR}/setup-lemonade.sh --groups ${SCRIPT_DIR}/groups.ya
 echo ""
 echo "  3. In another terminal, start the VS Code sandboxes:"
 echo "     . ~/.venv/bin/activate"
-echo "     python ${SCRIPT_DIR}/main.py --groups ${SCRIPT_DIR}/groups.yaml --external-ip <YOUR_IP> --lemonade kilo.json --vscode-settings ${SCRIPT_DIR}/vscode-settings.jsonc"
+echo "     python ${REPO_DIR}/main.py --groups ${REPO_DIR}config/groups.yaml --external-ip <YOUR_IP> --lemonade kilo.json --vscode-settings ${SCRIPT_DIR}/vscode-settings.jsonc"
 echo ""
 if [ -n "$CAROOT" ]; then
     echo "[Setup] For client browsers: install the mkcert CA root from:"

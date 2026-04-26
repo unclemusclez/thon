@@ -29,5 +29,5 @@ if [ "$PUSH" = "false" ]; then
     -t waterpistol/thon:${TAG} \
     -f Dockerfile \
     --load \
-    "${SCRIPT_DIR}"
+    "${SCRIPT_DIR}/.."
 fi
