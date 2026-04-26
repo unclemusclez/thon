@@ -2,3 +2,7 @@ __pycache__
 .env
 .venv
 snapshot-version.txt
+kilo.json
+.kilo*
+vscode-settings.jsonc
+.vscode*

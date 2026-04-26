@@ -1,0 +1,31 @@
+# VS Code Remote - Groups Configuration
+#
+# Define groups and individuals for sandbox instance allocation.
+# Each user gets their own VS Code sandbox instance with a workspace
+# at /workspace/{group}/{username}.
+#
+# Usage:
+#   # Run all groups
+#   uv run python ./main.py --groups groups.yaml
+#
+#   # Run a single group
+#   uv run python ./main.py --groups groups.yaml --group alpha
+#
+#   # Run with secure auth (generates per-user passwords)
+#   uv run python ./main.py --groups groups.yaml --secure
+
+groups:
+  alpha:
+    users:
+      - alice
+      - bob
+      - carol
+
+  beta:
+    users:
+      - dave
+      - eve
+
+  gamma:
+    users:
+      - frank

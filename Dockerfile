@@ -21,12 +21,17 @@
 #   - For HTTPS, mount certificates and use: code-server --cert /certs/server.pem --cert-key /certs/server-key.pem
 #   - mkcert certificates can be generated on host and mounted into container
 
-FROM python:3.12-slim
+# Use the official Ubuntu 24.04 LTS base image
+FROM ubuntu:24.04
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=1
+
+# Dotnet
+Run wget https://packages.microsoft.com/config/ubuntu/24.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+RUN dpkg -i packages-microsoft-prod.deb
 
 # Install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -37,8 +42,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     lsb-release \
     openssl \
     ca-certificates \
+    vim \
+    nano \
+    sudo \
+    python \
+    python-venv\
+    python-pip \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
+RUN npm install -g pnpm npx
 # Install code-server
 RUN curl -fsSL https://code-server.dev/install.sh | sh \
     && code-server --version
@@ -58,7 +72,7 @@ WORKDIR /workspace
 USER vscode
 
 # Install VS Code extensions from extensions.txt
-COPY --chown=vscode:vscode ./extensions.txt /tmp/extensions.txt
+COPY --chown=vscode:vscode ./config/extensions.txt.example /tmp/extensions.txt
 RUN while IFS= read -r ext; do \
       ext="$(echo "$ext" | tr -d '\r')"; \
       [ -z "$ext" ] && continue; \
