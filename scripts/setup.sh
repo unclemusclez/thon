@@ -24,7 +24,7 @@ sudo apt-get update
 sudo apt-get upgrade -y
 
 sudo apt-get install -y --no-install-recommends \
-    python3 \
+    python3-full \
     python3-venv \
     python3-pip \
     python-is-python3 \
