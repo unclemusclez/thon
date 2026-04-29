@@ -113,7 +113,6 @@ vscjava.vscode-java-dependency
 vscjava.vscode-java-pack
 vscjava.vscode-java-test
 vscjava.vscode-maven
-vstirbu.vscode-mermaid-preview
 whitphx.vscode-stlite
 wholroyd.jinja
 xdebug.php-debug
