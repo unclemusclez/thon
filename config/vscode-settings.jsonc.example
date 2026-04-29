@@ -188,4 +188,5 @@
     "kilo-code.new.showTaskTimeline": true,
     "kilo-code.new.browserAutomation.enabled": true,
     "window.newWindowProfile": "Default"
-}
+    "jdk.telemetry.enabled": false
+"}
