@@ -80,7 +80,7 @@ REPO_DIR="${SCRIPT_DIR}/.."
 # fi
 
 echo "[Setup] Building Docker image..."
-docker build -t opensandbox/vscode:latest -f "${SCRIPT_DIR}/Dockerfile" "${REPO_DIR}"
+docker build -t waterpistol/thon -f "Dockerfile" "${REPO_DIR}"
 
 echo "[Setup] Installing OpenSandbox server and CLI..."
 python3 -m venv ~/.venv
